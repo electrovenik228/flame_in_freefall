@@ -76,3 +76,18 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 - **API types are written by hand** in `frontend/src/lib/api.ts` for the weekend build. Generating the client from the OpenAPI schema is left to the full build.
 - **The list loads all records in one request** (page size 200). With 23 records there is no pager.
 - **Browser tests run on the developer machine** against the Compose stack: `cd frontend && npm install && npx playwright test`.
+
+## Step 6. AI generation
+
+Status: code complete, **check not yet passed**. The Claude API rejects the key in `.env` (HTTP 401), so nothing has been generated.
+
+- **Run it with** `docker compose exec web python manage.py generate_ai`. It prints the step 6 check at the end; `--report` prints the check alone.
+- **Extraction returns values as the source writes them**, with the source's unit. Conversion to kPa, percent and cm/s is done in code. Each number must appear in one of its own evidence quotes.
+- **Quote check.** A quote must appear word for word in the named source document. Only runs of whitespace are normalized.
+- **Number check for prose.** A number in AI text passes when the same number appears in a source document of the cited record. PSI identifiers and digits inside names (C2H4) are not numeric claims. Prompts forbid unit conversion in prose, so no conversion is attempted in the check.
+- **Failed checks.** The model gets one more attempt with the list of problems. If the second attempt also fails, the result is rejected: a row marked "not generated" keeps the reasons, and nothing is shown.
+- **Refusals** follow section 7.3: marked "not generated", no retry. Server-side refusal fallbacks are not enabled.
+- **Test-run statistics are a citable document.** Counts and ranges computed from the database are rendered as text, so a summary can cite "274 test runs" and the number check can verify it.
+- **Summaries use two requests per record**, one per reading level, with the documents cached between them.
+- **Effort.** Stored jobs run at `high` effort (`CLAUDE_BACKGROUND_EFFORT`), not the Opus 5.5 default of medium.
+- **Anthropic SDK 2.8** is installed, which uses API version 2026-10-21.

@@ -4,3 +4,6 @@ extend-exclude = ["*/migrations/*"]
 
 [lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[lint.per-file-ignores]
+"tests/*" = ["E501"]
