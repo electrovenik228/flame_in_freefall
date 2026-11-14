@@ -68,3 +68,11 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 - **Export file type** is chosen with `output=csv` or `output=json`, because `format` is reserved by the REST framework.
 - **No response cache in the weekend build.** Section 9 caches list and detail responses in Redis; without Redis the queries go straight to PostgreSQL, which is fast at this size.
 - **Default order** of investigations is by PSI number.
+
+## Step 5. Catalogue pages
+
+- **Both themes ship.** The tokens of section 10.1 are CSS variables, so the light theme came at no extra cost. Dark is the default when the system has no preference.
+- **Safety-function hues:** prevention violet, detection teal, suppression pink, each with its own icon and text label.
+- **API types are written by hand** in `frontend/src/lib/api.ts` for the weekend build. Generating the client from the OpenAPI schema is left to the full build.
+- **The list loads all records in one request** (page size 200). With 23 records there is no pager.
+- **Browser tests run on the developer machine** against the Compose stack: `cd frontend && npm install && npx playwright test`.

@@ -20,7 +20,8 @@ docker compose up -d --build
 ## Tests and linting
 
 ```sh
-docker compose exec web sh -c "ruff check --no-cache . && pytest"
+docker compose exec web sh -c "ruff check --no-cache . && pytest"   # back end
+cd frontend && npm install && npm test && npx playwright test       # front end, against the running stack
 ```
 
 ## Layout

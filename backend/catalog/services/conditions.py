@@ -53,7 +53,8 @@ def variable_summary(investigation: Investigation) -> dict:
         return result
     for column, label, unit in VARIABLES:
         numeric = unit is not None
-        known = runs.filter(**{f"{column}__isnull": False}) if numeric else runs.exclude(**{column: ""})
+        # order_by() clears the model ordering, which would otherwise defeat DISTINCT.
+        known = (runs.filter(**{f"{column}__isnull": False}) if numeric else runs.exclude(**{column: ""})).order_by()
         recorded = known.count()
         if not recorded:
             result["not_recorded"].append({"field": column, "label": label})

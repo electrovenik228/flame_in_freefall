@@ -274,7 +274,7 @@ def load_fixture(path: Path) -> IngestionRun:
         (VocabularyTerm.Kind.DILUENT, "diluent"),
         (VocabularyTerm.Kind.EXTINCTION_MODE, "extinction_mode"),
     ):
-        for value in TestRun.objects.exclude(**{column: ""}).values_list(column, flat=True).distinct():
+        for value in TestRun.objects.exclude(**{column: ""}).order_by().values_list(column, flat=True).distinct():
             VocabularyTerm.objects.get_or_create(
                 kind=kind, code=slugify(value)[:60] or "term", defaults={"label": value}
             )

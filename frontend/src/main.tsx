@@ -1,9 +1,9 @@
+import "./index.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-function App() {
-  return <h1>Flame in Freefall</h1>;
-}
+import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

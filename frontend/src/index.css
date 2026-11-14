@@ -1,0 +1,77 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens (section 10.1). One set of names, two themes. Values are RGB triples. */
+:root {
+  --bg: 247 248 250; /* #F7F8FA */
+  --surface: 255 255 255; /* #FFFFFF */
+  --surface-2: 238 241 246;
+  --line: 219 224 233;
+  --text: 18 24 38; /* #121826 */
+  --muted: 84 94 114;
+  --accent: 31 111 235; /* #1F6FEB microgravity */
+  --warm: 180 83 9; /* #B45309 Earth gravity and hazard */
+  --prevention: 109 40 217;
+  --detection: 15 118 110;
+  --suppression: 190 24 93;
+  --danger: 185 28 28;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 11 15 26; /* #0B0F1A */
+  --surface: 20 26 42; /* #141A2A */
+  --surface-2: 28 35 55;
+  --line: 40 49 73;
+  --text: 232 236 244; /* #E8ECF4 */
+  --muted: 154 166 189;
+  --accent: 77 163 255; /* #4DA3FF */
+  --warm: 255 180 84; /* #FFB454 */
+  --prevention: 167 139 250;
+  --detection: 45 212 191;
+  --suppression: 244 114 182;
+  --danger: 248 113 113;
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-text antialiased;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-accent;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .num {
+    @apply font-mono tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}

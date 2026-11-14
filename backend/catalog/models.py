@@ -163,7 +163,7 @@ class Investigation(models.Model):
     def refresh_search_text(self) -> None:
         """Rebuild the full-text column, including fuel, facility and instrument names (section 5.3)."""
         head = " ".join(filter(None, [self.psi_id, self.acronym, self.title]))
-        fuels = self.test_runs.exclude(fuel="").values_list("fuel", flat=True).distinct()
+        fuels = self.test_runs.exclude(fuel="").order_by().values_list("fuel", flat=True).distinct()
         body = " ".join(
             filter(
                 None,

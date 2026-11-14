@@ -52,6 +52,10 @@ def test_detail(client, seeded):
     varied = {item["field"] for item in body["variables"]["varied"]}
     assert {"fuel", "oxygen_pct", "pressure_kpa"} <= varied
     assert {"field": "flow_speed_cm_s", "label": "Flow speed"} in body["variables"]["not_recorded"]
+    fuel = next(item for item in body["variables"]["varied"] if item["field"] == "fuel")
+    assert fuel["values"] == ["Heptane", "Methanol"] and fuel["distinct_values"] == 2
+    constant = {item["field"]: item["values"] for item in body["variables"]["constant"]}
+    assert constant["fuel_form"] == ["droplet"] and constant["gravity_level"] == ["microgravity"]
     assert body["summary"] is None  # nothing generated yet, and nothing invented
     assert {item["psi_id"] for item in body["related"]} == {"PSI-68"}
     assert len(body["publications"]) == 51 and body["facilities"]
