@@ -1,0 +1,20 @@
+# Runtime
+Django>=5.2,<5.3
+djangorestframework>=3.16,<3.17
+django-filter>=25.1
+drf-spectacular>=0.28
+django-cors-headers>=4.7
+dj-database-url>=2.3
+psycopg[binary]>=3.2,<3.3
+gunicorn>=23.0
+uvicorn>=0.34
+uvicorn-worker>=0.3
+whitenoise>=6.9
+anthropic>=0.80
+sentry-sdk>=2.20
+
+# Quality (same image runs the tests)
+pytest>=8.3
+pytest-django>=4.10
+pytest-cov>=6.0
+ruff>=0.9

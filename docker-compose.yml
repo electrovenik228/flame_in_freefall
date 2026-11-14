@@ -1,0 +1,40 @@
+# Local development: `docker compose up`. Weekend scope runs Nginx, Django and PostgreSQL only.
+services:
+  db:
+    image: postgres:17-alpine
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build: ./backend
+    env_file: .env
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py createcachetable &&
+             uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: deploy/nginx/Dockerfile
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - web
+
+volumes:
+  pgdata:

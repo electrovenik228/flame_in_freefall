@@ -1,0 +1,28 @@
+# Secrets: never commit. Use .env.example for placeholders.
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+playwright-report/
+test-results/
+
+# Local data
+*.sqlite3
+backups/
+.DS_Store
+
+# Raw PSI exports stay local; the slim fixture is committed
+backend/data/raw/
+backend/staticfiles/
