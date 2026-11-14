@@ -194,3 +194,84 @@ export interface Stats {
   last_refresh: string | null;
   source_retrieved_at: string | null;
 }
+
+export interface Environment {
+  id: number;
+  slug: string;
+  name: string;
+  oxygen_pct_min: number | null;
+  oxygen_pct_max: number | null;
+  pressure_kpa_min: number | null;
+  pressure_kpa_max: number | null;
+  gravity: string;
+  gravity_g: number | null;
+  flow_cm_s_min: number | null;
+  flow_cm_s_max: number | null;
+  ventilation_notes: string;
+  source: string;
+  source_url: string;
+}
+
+export type CriterionKey = "atmosphere" | "fuel" | "safety" | "flow" | "gravity";
+
+export interface SubScore {
+  label: string;
+  status: "scored" | "not_available" | "not_applicable";
+  score: number | null;
+  weight: number;
+  points: number | null;
+  explanation: string;
+  source: { label?: string; psi_id?: string; psi_url?: string; quotes?: string[]; ai?: { model?: string; generated_at?: string } };
+  details: Record<string, unknown>;
+}
+
+export interface RankingRow {
+  psi_id: string;
+  display_name: string;
+  title: string;
+  data_depth: string;
+  fuel_state: string;
+  safety_pillars: Pillar[];
+  psi_url: string;
+  total: number | null;
+  partial_data: boolean;
+  rank: number;
+  sub_scores: Record<CriterionKey, SubScore>;
+}
+
+export interface RankingResponse {
+  environment: Environment | null;
+  target: { name: string };
+  weights: Record<CriterionKey, number>;
+  criteria: Record<CriterionKey, string>;
+  disclaimer: string;
+  gravity_note: string;
+  results: RankingRow[];
+}
+
+export interface CoverageBin {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  count: number;
+  investigations: { psi_id: string; name: string; runs: number }[];
+}
+
+export interface CoverageResponse {
+  x: { field: string; unit: string; bin: number };
+  y: { field: string; unit: string; bin: number };
+  test_runs_total: number;
+  test_runs_plotted: number;
+  test_runs_missing_an_axis: number;
+  bins: CoverageBin[];
+  environments: (Environment & {
+    test_runs_inside: number;
+    tested: boolean;
+    nearest: { psi_id: string; display_name: string; atmosphere_score: number; explanation: string; basis: string }[];
+  })[];
+  partial_gravity: {
+    statement: string;
+    bounding_records: { psi_id: string; display_name: string; one_g_reference: boolean; partial_gravity_proxy: boolean; quotes: string[] }[];
+  };
+}

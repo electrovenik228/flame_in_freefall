@@ -75,3 +75,20 @@
     color: black;
   }
 }
+
+/* Chart colours. Categorical slots are assigned to criteria in a fixed order and were
+   checked for colour-vision separation on each theme's surface. */
+:root {
+  --series-1: 42 120 214; /* atmosphere */
+  --series-2: 235 104 52; /* fuel */
+  --series-3: 27 175 122; /* safety */
+  --series-4: 237 161 0; /* flow */
+  --series-5: 232 123 164; /* gravity */
+}
+.dark {
+  --series-1: 57 135 229;
+  --series-2: 217 89 38;
+  --series-3: 25 158 112;
+  --series-4: 201 133 0;
+  --series-5: 213 81 129;
+}

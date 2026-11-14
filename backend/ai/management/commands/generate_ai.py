@@ -3,16 +3,21 @@ from django.core.management.base import BaseCommand, CommandError
 
 from ai.models import AICall
 from ai.services import generate
+from ai.services.scores import refresh_scores
 from catalog.models import Investigation
 
-JOBS = {"extraction": generate.generate_extraction, "summary": generate.generate_summary}
+JOBS = {
+    "extraction": generate.generate_extraction,
+    "summary": generate.generate_summary,
+    "judgment": generate.generate_judgment,
+}
 
 
 class Command(BaseCommand):
     help = "Generate and store AI output (extraction, summaries) for investigations. Unchanged input is skipped."
 
     def add_arguments(self, parser):
-        parser.add_argument("--jobs", default="extraction,summary", help="Comma-separated: extraction, summary")
+        parser.add_argument("--jobs", default="extraction,summary,judgment", help="Comma-separated job names")
         parser.add_argument("--psi", action="append", help="PSI identifier; repeat for several. Default: all records")
         parser.add_argument("--seed-only", action="store_true", help="Only the twelve seed investigations")
         parser.add_argument("--force", action="store_true", help="Regenerate even when the input is unchanged")
@@ -22,7 +27,8 @@ class Command(BaseCommand):
     def handle(self, *args, jobs, psi, seed_only, force, report, reproject, **options):
         if reproject:
             done = sum(generate.reproject_extraction(item) for item in Investigation.objects.all())
-            self.stdout.write(f"Re-applied {done} stored extractions")
+            judged = sum(generate.reproject_judgment(item) for item in Investigation.objects.all())
+            self.stdout.write(f"Re-applied {done} stored extractions and {judged} judgments")
         elif not report:
             names = [name.strip() for name in jobs.split(",") if name.strip()]
             unknown = set(names) - set(JOBS)
@@ -55,6 +61,7 @@ class Command(BaseCommand):
             tokens_in = sum(call.input_tokens + call.cache_read_tokens + call.cache_write_tokens for call in calls)
             tokens_out = sum(call.output_tokens for call in calls)
             self.stdout.write(f"Claude requests: {len(calls)}, input tokens: {tokens_in}, output tokens: {tokens_out}")
+        self.stdout.write(f"Rubric scores stored: {refresh_scores()}")
         result = generate.step6_report()
         verdict = (
             "PASSED"

@@ -9,7 +9,8 @@ from django.db import transaction
 from django.utils.dateparse import parse_datetime
 
 from ai.models import Insight
-from ai.services.generate import reproject_extraction
+from ai.services.generate import reproject_extraction, reproject_judgment
+from ai.services.scores import refresh_scores
 from catalog.models import Investigation
 
 
@@ -41,4 +42,6 @@ class Command(BaseCommand):
             Insight.objects.filter(pk=insight.pk).update(generated_at=generated_at)
             created += 1
         applied = sum(reproject_extraction(item) for item in Investigation.objects.all())
-        self.stdout.write(f"{created} AI rows imported, {applied} extractions applied")
+        judged = sum(reproject_judgment(item) for item in Investigation.objects.all())
+        refresh_scores()
+        self.stdout.write(f"{created} AI rows imported, {applied} extractions and {judged} judgments applied")

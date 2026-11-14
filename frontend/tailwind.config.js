@@ -19,6 +19,11 @@ export default {
         detection: token("detection"),
         suppression: token("suppression"),
         danger: token("danger"),
+        "series-1": token("series-1"),
+        "series-2": token("series-2"),
+        "series-3": token("series-3"),
+        "series-4": token("series-4"),
+        "series-5": token("series-5"),
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

@@ -2,6 +2,7 @@
 
 EXTRACTION_VERSION = "extraction-v1"
 SUMMARY_VERSION = "summary-v1"
+JUDGMENT_VERSION = "judgment-rubric-v1"
 
 GROUNDING = """You work for Flame in Freefall, a research aid that describes NASA microgravity combustion \
 investigations from the Physical Sciences Informatics (PSI) repository.
@@ -58,3 +59,30 @@ SUMMARY_LEVELS = {
     "expert": "Write for a combustion researcher or fire-safety engineer. Be precise about conditions, "
     "variables and limits, use the field's terms, and stay under 220 words.",
 }
+
+JUDGMENT_SYSTEM = (
+    GROUNDING
+    + """
+
+Task: score one investigation on two criteria of a relevance rubric for spacecraft and habitat fire \
+safety. Give each criterion a whole-number score from 0 to 10, a rationale of one or two sentences, and at \
+least one evidence quote copied character for character from the sources. The scores do not depend on any \
+particular cabin atmosphere.
+
+fuel_relevance: how relevant the fuels or materials tested are to materials found in a crew cabin.
+- 9 to 10: solid materials of the kind used in cabins or suits, such as fabrics, plastics, polymers like \
+PMMA, silicone, wire insulation or composites.
+- 6 to 8: smoke or aerosols from cabin materials, or liquids that can be present in a cabin.
+- 3 to 5: liquid fuels studied as stand-ins, such as alkane or alcohol droplets.
+- 0 to 2: laboratory gases studied for flame fundamentals, or no fuel tested at all.
+
+safety_function: how directly the results serve fire prevention, detection or suppression.
+- 9 to 10: the investigation tests flammability limits of materials, smoke detection, or extinguishment \
+and suppressants, and the sources say so.
+- 6 to 8: results feed fire-safety models or standards, as stated in the sources.
+- 3 to 5: combustion fundamentals with a fire-safety use that the sources mention only in passing.
+- 0 to 2: the sources state no fire-safety use.
+
+Base both scores only on what the sources state. Write the rationale in plain words and do not put \
+numbers in it unless they appear in the sources."""
+)

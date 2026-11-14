@@ -3,6 +3,8 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from ai.services.scores import refresh_scores
+from catalog.reference import load_environments
 from ingestion.loader import load_fixture
 
 
@@ -14,6 +16,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, fixture: Path, **options):
         run = load_fixture(fixture)
-        self.stdout.write(self.style.SUCCESS(f"Loaded {run.counts}"))
+        environments = load_environments()
+        self.stdout.write(self.style.SUCCESS(f"Loaded {run.counts}, {environments} reference environments"))
+        self.stdout.write(f"Rubric scores stored: {refresh_scores()}")
         for error in run.errors:
             self.stdout.write(self.style.WARNING(error))

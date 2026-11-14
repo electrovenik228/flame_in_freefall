@@ -94,3 +94,15 @@ Status on 15 November 2026: **check passed for the twelve seed records**; 21 of 
 - **AI output is exported to `backend/fixtures/ai_output.json`** (`manage.py export_ai_output`) and loaded with `manage.py import_ai_output`. A fresh database or the server gets the stored output without new Claude requests.
 - **One-sided statements keep their missing bound.** "Up to 20 atm" is stored as a maximum only and shown as "≤".
 - **Instruments** come from the extraction, each with an evidence quote. The PSI export has no structured instrument field.
+
+## Step 7. Ranking and coverage
+
+- **Atmosphere match.** A tested condition within tolerance of the environment window scores 1 (oxygen within 1 percentage point, pressure within 5 kPa). Beyond that the score falls in a straight line to 0 at a further 10 points of oxygen or 50 kPa. With test runs, the best single run decides, so oxygen and pressure are matched jointly, and the explanation counts the runs inside the window. Without test runs, the record-level ranges are used.
+- **An axis the record does not state** is left out of the atmosphere score and the row is tagged "partial data".
+- **Flow match is not scored for the five reference environments.** The brief gives no ventilation speed and no NASA figure could be confirmed, so none was invented. The criterion is scored when a flow window exists: under Custom atmosphere, or after the owner sets `flow_cm_s_min` and `flow_cm_s_max` in the admin. The same tolerance rule applies (2 cm/s, then 20 cm/s).
+- **"Not applicable" differs from "not available".** A criterion the environment does not define is rescaled away without a tag. A criterion the record lacks data for is rescaled away with the "partial data" tag.
+- **Gravity relevance does not depend on the environment.** 6 points when PSI lists the record as a microgravity investigation, 2 when the record refers to 1 g or ground reference tests (matched on phrases, the matching sentence is shown as evidence), 2 for an electric field. This follows the scoring rule of section 7.4, not the "changes with the environment" column of its table.
+- **AI judgment.** Fuel relevance and safety function are scored 0 to 10 by Claude against written anchors, with evidence quotes, once per investigation. The rubric version is part of the input hash, so a rubric change regenerates them.
+- **Rankings are computed on request** from stored data (about 0.1 s), and also stored per pair in `RelevanceScore` by `load_seed`, `import_ai_output` and `generate_ai`.
+- **Coverage.** Oxygen in 2-point bins against pressure in 20 kPa bins or flow in 5 cm/s bins. An empty cell means no test run. Counts use five ordered steps of one hue. The spacesuit atmosphere is off the chart and reported as a gap card.
+- **Chart colours** for the five criteria were checked with a colour-vision validator on both theme surfaces.

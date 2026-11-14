@@ -6,6 +6,7 @@ from django.db import transaction
 from ai import prompts
 from ai.models import Insight, ReviewStatus
 from ai.services import extraction as extraction_job
+from ai.services import judgment as judgment_job
 from ai.services import llm
 from ai.services import summary as summary_job
 from ai.services.sources import input_hash, sources_for
@@ -122,6 +123,81 @@ def generate_extraction(investigation: Investigation, force: bool = False) -> st
         **common,
     )
     apply_extraction(investigation, extraction, ranges)
+    return "generated"
+
+
+def apply_judgment(investigation: Investigation, insight: Insight) -> None:
+    """Project a verified judgment onto Investigation.judgment_scores, with scores on a 0 to 1 scale."""
+    titles = insight.content.get("sources", {})
+    investigation.judgment_scores = {
+        key: {
+            "score": insight.content[key]["score"] / 10,
+            "rationale": insight.content[key]["rationale"],
+            "evidence": [
+                {"quote": item["quote"], "source": titles.get(item["source_id"], item["source_id"])}
+                for item in insight.content[key]["evidence"]
+            ],
+            "model": insight.model,
+            "generated_at": insight.generated_at.isoformat(),
+            "prompt_version": insight.prompt_version,
+        }
+        for key in ("fuel_relevance", "safety_function")
+    }
+    investigation.save(update_fields=["judgment_scores"])
+
+
+def reproject_judgment(investigation: Investigation) -> bool:
+    from ai.services.current import current_insight
+
+    insight = current_insight(investigation, Insight.Type.JUDGMENT)
+    if insight is None or not insight.content:
+        return False
+    apply_judgment(investigation, insight)
+    return True
+
+
+def generate_judgment(investigation: Investigation, force: bool = False) -> str:
+    """Runs at ingestion and when the rubric changes: the rubric version is part of the input hash."""
+    sources = sources_for(investigation, with_stats=False)
+    digest = input_hash(prompts.JUDGMENT_VERSION, settings.CLAUDE_MODEL_FRONTIER, sources)
+    if not force and already_generated(investigation, Insight.Type.JUDGMENT, digest):
+        return "unchanged"
+    common = {"prompt_version": prompts.JUDGMENT_VERSION, "digest": digest, "citations": []}
+    try:
+        judgment, checks, model = judgment_job.run_judgment(sources)
+    except (llm.Refused, llm.Truncated) as exc:
+        store(
+            investigation,
+            Insight.Type.JUDGMENT,
+            content={},
+            model=settings.CLAUDE_MODEL_FRONTIER,
+            checks={"not_generated": f"{type(exc).__name__}: {exc}"},
+            status=ReviewStatus.NOT_GENERATED,
+            **common,
+        )
+        return "not generated"
+    if judgment is None:
+        store(
+            investigation,
+            Insight.Type.JUDGMENT,
+            content={},
+            model=model,
+            checks=checks,
+            status=ReviewStatus.NOT_GENERATED,
+            **common,
+        )
+        return "rejected"
+    content = {**judgment.model_dump(), "sources": {s.source_id: s.document.title for s in sources}}
+    insight = store(
+        investigation,
+        Insight.Type.JUDGMENT,
+        content=content,
+        model=model,
+        checks=checks,
+        status=ReviewStatus.UNREVIEWED,
+        **common,
+    )
+    apply_judgment(investigation, insight)
     return "generated"
 
 

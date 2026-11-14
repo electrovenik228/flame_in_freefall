@@ -4,7 +4,7 @@ import { test } from "@playwright/test";
 const OUT = process.env.SCREENSHOT_DIR;
 const PAGES: [string, string][] = (process.env.SCREENSHOT_PAGES ?? "investigations=/investigations")
   .split(",")
-  .map((entry) => entry.split("=") as [string, string]);
+  .map((entry) => [entry.slice(0, entry.indexOf("=")), entry.slice(entry.indexOf("=") + 1)] as [string, string]);
 
 for (const theme of ["dark", "light"]) {
   for (const [name, path] of PAGES) {
