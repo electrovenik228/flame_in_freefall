@@ -134,15 +134,15 @@ def normalized_ranges(extraction: Extraction) -> dict[str, float | None]:
     """Convert the as-written values to the fixed units of section 5.3. The conversion is done in code."""
 
     def convert(field, factors: dict[str, float]) -> tuple[float | None, float | None]:
+        # A one-sided statement such as "up to 20 atm" keeps its missing bound empty.
         factor = factors.get(field.unit)
         if factor is None:
             return None, None
-        low = field.min_value if field.min_value is not None else field.max_value
-        high = field.max_value if field.max_value is not None else field.min_value
-        if low is None or high is None:
-            return None, None
-        low, high = sorted((low * factor, high * factor))
-        return round(low, 4), round(high, 4)
+        low = None if field.min_value is None else round(field.min_value * factor, 4)
+        high = None if field.max_value is None else round(field.max_value * factor, 4)
+        if low is not None and high is not None and low > high:
+            low, high = high, low
+        return low, high
 
     oxygen = convert(extraction.oxygen, OXYGEN_TO_PCT)
     pressure = convert(extraction.pressure, PRESSURE_TO_KPA)

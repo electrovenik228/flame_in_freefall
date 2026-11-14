@@ -11,7 +11,11 @@ Requirements: Docker with Compose.
 ```sh
 cp .env.example .env        # then fill in the values
 docker compose up -d --build
+docker compose exec web python manage.py load_seed          # PSI records and test runs
+docker compose exec web python manage.py import_ai_output   # stored AI output, no Claude request
 ```
+
+To regenerate AI output (needs `ANTHROPIC_API_KEY` with credit): `docker compose exec web python manage.py generate_ai`.
 
 - Site: http://localhost:8080/
 - API: http://localhost:8080/api/v1/ (interactive docs at `/api/v1/docs/`)

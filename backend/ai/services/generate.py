@@ -64,6 +64,18 @@ def apply_extraction(investigation: Investigation, extraction: extraction_job.Ex
     investigation.refresh_search_text()
 
 
+def reproject_extraction(investigation: Investigation) -> bool:
+    """Re-apply the stored, verified extraction to the Investigation columns. No API call."""
+    from ai.services.current import current_insight
+
+    insight = current_insight(investigation, Insight.Type.EXTRACTION)
+    if insight is None or not insight.content:
+        return False
+    extraction = extraction_job.Extraction.model_validate(insight.content)
+    apply_extraction(investigation, extraction, extraction_job.normalized_ranges(extraction))
+    return True
+
+
 def generate_extraction(investigation: Investigation, force: bool = False) -> str:
     sources = sources_for(investigation, with_stats=False)
     digest = input_hash(prompts.EXTRACTION_VERSION, settings.CLAUDE_MODEL_DEEP, sources)
@@ -178,7 +190,9 @@ def step6_report() -> dict:
         extraction = current_insight(investigation, Insight.Type.EXTRACTION)
         if extraction is None or not extraction.checks.get("evidence_quotes_verified"):
             report["unverified_extraction"].append(investigation.psi_id)
-    report["passed"] = not (
-        report["without_ranges_or_mark"] or report["without_cited_summary"] or report["unverified_extraction"]
-    )
+    seed_ids = set(Investigation.objects.filter(is_seed=True).values_list("psi_id", flat=True))
+    failing = set(report["without_ranges_or_mark"] + report["without_cited_summary"] + report["unverified_extraction"])
+    report["passed"] = not failing
+    # The check of step 6 is written for the seed set of section 4.6; the catalogue holds more records.
+    report["passed_for_seed_set"] = not (failing & seed_ids)
     return report

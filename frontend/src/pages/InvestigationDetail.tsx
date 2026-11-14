@@ -45,6 +45,62 @@ function VariableList({ title, items, empty }: { title: string; items: VariableE
   );
 }
 
+interface EvidenceItem {
+  source_id: string;
+  quote: string;
+}
+interface ExtractedField {
+  value?: string;
+  name?: string;
+  min_value?: number | null;
+  max_value?: number | null;
+  unit?: string;
+  evidence: EvidenceItem[];
+}
+
+/** Quoted evidence behind every attribute the AI read from the record (section 7.3). */
+function ExtractionEvidence({ data }: { data: Detail }) {
+  if (!data.extraction) return null;
+  const content = data.extraction.content as Record<string, unknown>;
+  const sources = (content.sources ?? {}) as Record<string, string>;
+  const asWritten = (field: ExtractedField) =>
+    field.min_value == null && field.max_value == null
+      ? "Not stated"
+      : `${span(field.min_value, field.max_value, 3)} ${field.unit === "mole_fraction" ? "mole fraction" : field.unit === "percent" ? "%" : field.unit}`;
+  const rows: { label: string; value: string; evidence: EvidenceItem[] }[] = [
+    { label: "Fuel state", field: content.fuel_state as ExtractedField },
+    { label: "Data depth", field: content.data_depth as ExtractedField },
+  ].map(({ label, field }) => ({ label, value: field.value === "unknown" ? "Not stated" : (field.value ?? ""), evidence: field.evidence }));
+  for (const item of (content.safety_pillars ?? []) as ExtractedField[]) rows.push({ label: "Safety function", value: item.value ?? "", evidence: item.evidence });
+  for (const [label, key] of [["Oxygen, as written", "oxygen"], ["Pressure, as written", "pressure"], ["Flow speed, as written", "flow_speed"]]) {
+    const field = content[key] as ExtractedField;
+    rows.push({ label, value: asWritten(field), evidence: field.evidence });
+  }
+  return (
+    <details className="mt-3 text-sm" data-testid="extraction-evidence">
+      <summary className="cursor-pointer text-accent">Quoted evidence for the attributes read by AI</summary>
+      <ul className="mt-2 space-y-3">
+        {rows.map((row, index) => (
+          <li key={index}>
+            <span className="text-muted">{row.label}:</span> <span className="num">{row.value}</span>
+            {row.evidence.map((item, i) => (
+              <blockquote key={i} className="mt-1 border-l-2 border-accent/60 pl-2 text-xs text-muted">
+                “{item.quote}”<span className="num block">{sources[item.source_id] ?? item.source_id}</span>
+              </blockquote>
+            ))}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3">
+        <AiLabel model={data.extraction.model} generatedAt={data.extraction.generated_at} reviewStatus={data.extraction.review_status} />
+      </div>
+      {data.conditions_source === "test_runs" && (
+        <p className="mt-2 text-xs text-muted">The ranges shown above come from the test runs, not from these as-written values.</p>
+      )}
+    </details>
+  );
+}
+
 function Summary({ data }: { data: Detail }) {
   const [level, setLevel] = useState<"plain" | "expert">("plain");
   if (!data.summary) {
@@ -204,6 +260,7 @@ export default function InvestigationDetail() {
               <p className="text-sm text-muted">No oxygen, pressure or flow range is stored for this record.</p>
             )}
             <p className="mt-3 text-xs text-muted">Source of ranges: {CONDITIONS_SOURCE[data.conditions_source]}.</p>
+            <ExtractionEvidence data={data} />
           </Card>
 
           {hasRuns ? (

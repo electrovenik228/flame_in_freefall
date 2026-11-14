@@ -79,7 +79,7 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 
 ## Step 6. AI generation
 
-Status: code complete, **check not yet passed**. The Claude API rejects the key in `.env` (HTTP 401), so nothing has been generated.
+Status on 15 November 2026: **check passed for the twelve seed records**; 21 of 23 records generated. PSI-39 (CFI) and PSI-47 (DAFT), which are not in the seed set, failed with "credit balance is too low" and are pending. The run made 70 Claude requests, about 4.70 USD at list price.
 
 - **Run it with** `docker compose exec web python manage.py generate_ai`. It prints the step 6 check at the end; `--report` prints the check alone.
 - **Extraction returns values as the source writes them**, with the source's unit. Conversion to kPa, percent and cm/s is done in code. Each number must appear in one of its own evidence quotes.
@@ -91,3 +91,6 @@ Status: code complete, **check not yet passed**. The Claude API rejects the key 
 - **Summaries use two requests per record**, one per reading level, with the documents cached between them.
 - **Effort.** Stored jobs run at `high` effort (`CLAUDE_BACKGROUND_EFFORT`), not the Opus 5.5 default of medium.
 - **Anthropic SDK 2.8** is installed, which uses API version 2026-10-21.
+- **AI output is exported to `backend/fixtures/ai_output.json`** (`manage.py export_ai_output`) and loaded with `manage.py import_ai_output`. A fresh database or the server gets the stored output without new Claude requests.
+- **One-sided statements keep their missing bound.** "Up to 20 atm" is stored as a maximum only and shown as "≤".
+- **Instruments** come from the extraction, each with an evidence quote. The PSI export has no structured instrument field.

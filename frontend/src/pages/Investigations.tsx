@@ -10,7 +10,7 @@ import { cn, DATA_DEPTH, psiSpan, span, years } from "@/lib/format";
 
 const FILTER_KEYS = [
   "q", "fuel_state", "safety_function", "data_depth", "facility", "fuel", "oxygen_pct_min", "has_flow",
-  "has_test_runs", "is_seed", "year_min", "year_max",
+  "has_test_runs", "is_seed", "year_min", "year_max", "project",
 ] as const;
 
 const FUEL_STATES = [
@@ -246,6 +246,7 @@ export default function Investigations() {
             <Chip active={filters.has_flow === "true"} onClick={() => set("has_flow", filters.has_flow ? null : "true")}>Flow speed recorded</Chip>
             <Chip active={filters.has_test_runs === "true"} onClick={() => set("has_test_runs", filters.has_test_runs ? null : "true")}>Has test runs</Chip>
             <Chip active={filters.is_seed === "true"} onClick={() => set("is_seed", filters.is_seed ? null : "true")}>Named in the challenge brief</Chip>
+            {filters.project && <Chip active onClick={() => set("project", null)}>Project: {filters.project}</Chip>}
           </div>
         </div>
       </Card>

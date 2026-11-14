@@ -7,7 +7,8 @@ describe("format", () => {
     expect(span(12, 34)).toBe("12–34");
     expect(span(21.5, 21.5)).toBe("21.5");
     expect(span(null, null)).toBeNull();
-    expect(span(null, 30)).toBe("30");
+    expect(span(null, 30)).toBe("≤ 30");
+    expect(span(5, null)).toBe("≥ 5");
   });
   it("converts kPa to psi", () => {
     expect(psiSpan(101.325, 101.325)).toBe("14.7");

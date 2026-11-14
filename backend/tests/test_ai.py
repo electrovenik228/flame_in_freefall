@@ -236,3 +236,27 @@ def test_step6_report(seeded, fake):
     assert generate.step6_report()["passed"] is False
     assert "PSI-68" in generate.step6_report()["without_ranges_or_mark"]
     assert "PSI-69" not in generate.step6_report()["without_ranges_or_mark"]  # has ranges from test runs
+
+
+def test_one_sided_statement_keeps_its_missing_bound(seeded):
+    """ "Up to 20 atm" is an upper bound, not a single tested value."""
+    up_to = flex2_extraction(pressure=ex.PressureRange(min_value=None, max_value=20, unit="atm", evidence=ev("x")))
+    ranges = ex.normalized_ranges(up_to)
+    assert ranges["pressure_kpa_min"] is None and ranges["pressure_kpa_max"] == pytest.approx(2026.5)
+
+
+def test_ai_output_round_trips_through_the_fixture(seeded, fake, tmp_path):
+    from django.core.management import call_command
+
+    flex2 = Investigation.objects.get(psi_id="PSI-68")
+    fake(reply(parsed=flex2_extraction()))
+    generate.generate_extraction(flex2)
+    path = tmp_path / "ai.json"
+    call_command("export_ai_output", "--out", str(path))
+    Insight.objects.all().delete()
+    Investigation.objects.filter(pk=flex2.pk).update(fuel_state="", conditions_source="", oxygen_pct_min=None)
+    call_command("import_ai_output", "--fixture", str(path))
+    call_command("import_ai_output", "--fixture", str(path))  # second import adds nothing
+    flex2.refresh_from_db()
+    assert Insight.objects.count() == 1 and flex2.fuel_state == "liquid" and flex2.oxygen_pct_min == 17.0
+    assert generate.generate_extraction(flex2) == "unchanged"  # no new Claude request after an import

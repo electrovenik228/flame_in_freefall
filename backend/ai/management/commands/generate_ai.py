@@ -17,9 +17,13 @@ class Command(BaseCommand):
         parser.add_argument("--seed-only", action="store_true", help="Only the twelve seed investigations")
         parser.add_argument("--force", action="store_true", help="Regenerate even when the input is unchanged")
         parser.add_argument("--report", action="store_true", help="Only print the step 6 check, generate nothing")
+        parser.add_argument("--reproject", action="store_true", help="Re-apply stored extractions, no API call")
 
-    def handle(self, *args, jobs, psi, seed_only, force, report, **options):
-        if not report:
+    def handle(self, *args, jobs, psi, seed_only, force, report, reproject, **options):
+        if reproject:
+            done = sum(generate.reproject_extraction(item) for item in Investigation.objects.all())
+            self.stdout.write(f"Re-applied {done} stored extractions")
+        elif not report:
             names = [name.strip() for name in jobs.split(",") if name.strip()]
             unknown = set(names) - set(JOBS)
             if unknown:
@@ -38,6 +42,12 @@ class Command(BaseCommand):
                         raise CommandError(
                             "The Claude API rejected the key in ANTHROPIC_API_KEY. Nothing was generated."
                         ) from exc
+                    except anthropic.BadRequestError as exc:
+                        if "credit balance" in str(exc):
+                            raise CommandError(
+                                "The Claude API account has no credit left. Stopped; finished records are stored."
+                            ) from exc
+                        status = f"failed: BadRequestError: {exc}"
                     except anthropic.APIError as exc:
                         status = f"failed: {type(exc).__name__}: {exc}"
                     self.stdout.write(f"{investigation.psi_id:8} {name:11} {status}")
@@ -46,4 +56,9 @@ class Command(BaseCommand):
             tokens_out = sum(call.output_tokens for call in calls)
             self.stdout.write(f"Claude requests: {len(calls)}, input tokens: {tokens_in}, output tokens: {tokens_out}")
         result = generate.step6_report()
-        self.stdout.write(f"Step 6 check: {'PASSED' if result['passed'] else 'NOT PASSED'} {result}")
+        verdict = (
+            "PASSED"
+            if result["passed"]
+            else ("PASSED for the seed set, not for all records" if result["passed_for_seed_set"] else "NOT PASSED")
+        )
+        self.stdout.write(f"Step 6 check: {verdict} {result}")

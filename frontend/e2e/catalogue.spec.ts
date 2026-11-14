@@ -7,9 +7,9 @@ test("browse, filter and open an investigation", async ({ page }) => {
   await expect(page.getByTestId("result-count")).toContainText("23 investigations");
   await expect(page.getByTestId("investigation-card")).toHaveCount(23);
 
-  await page.getByRole("button", { name: "Per-test data" }).click();
+  await page.getByRole("button", { name: "Has test runs" }).click();
   await expect(page.getByTestId("result-count")).toContainText("6 investigations");
-  await expect(page).toHaveURL(/data_depth=per_test/);
+  await expect(page).toHaveURL(/has_test_runs=true/);
 
   await page.getByLabel("Fuel in test runs").fill("heptane");
   await expect(page.getByTestId("result-count")).toContainText("1 investigation,");
@@ -28,7 +28,7 @@ test("browse, filter and open an investigation", async ({ page }) => {
 
 test("a shared link restores the filtered view, and the table view sorts", async ({ page }) => {
   await page.goto("/investigations?project=saffire&view=table&has_flow=true");
-  await expect(page.getByTestId("result-count")).toContainText("3 investigations");
+  await expect(page.getByTestId("result-count")).toContainText("3 investigations, 2 filters applied");
   await page.getByRole("button", { name: "Test runs", exact: true }).click(); // numbers sort high to low first
   await expect(page.locator("tbody tr").first()).toContainText("SAFFIRE-II");
 });

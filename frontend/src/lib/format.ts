@@ -11,12 +11,12 @@ export function fmt(value: number, digits = 1): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(digits);
 }
 
-/** "12–34" for a span, "21.5" for a single value, null when nothing is recorded. */
+/** "12–34" for a span, "21.5" for a single value, "≤ 40" for a one-sided bound, null when nothing is recorded. */
 export function span(min: number | null | undefined, max: number | null | undefined, digits = 1): string | null {
   if (min == null && max == null) return null;
-  const low = min ?? max!;
-  const high = max ?? min!;
-  return fmt(low, digits) === fmt(high, digits) ? fmt(low, digits) : `${fmt(low, digits)}–${fmt(high, digits)}`;
+  if (min == null) return `≤ ${fmt(max!, digits)}`;
+  if (max == null) return `≥ ${fmt(min, digits)}`;
+  return fmt(min, digits) === fmt(max, digits) ? fmt(min, digits) : `${fmt(min, digits)}–${fmt(max, digits)}`;
 }
 
 export function psiSpan(min: number | null | undefined, max: number | null | undefined): string | null {

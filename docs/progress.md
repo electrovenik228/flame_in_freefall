@@ -10,7 +10,7 @@ Weekend build, section 13.3 of the specification. A step is done only when its c
 | 3. Seed data | Done | 23 investigations loaded, equal to the fixture; every record has its PSI link; 749 test runs from 7 tables |
 | 4. Catalogue API | Done | 31 tests pass; OpenAPI schema builds with `--validate --fail-on-warn` |
 | 5. Catalogue pages | Done | Playwright: browse, filter, open a record (4 tests pass); pages checked by screenshot in dark and light themes |
-| 6. AI generation | Blocked on the API key | Code written; 12 tests pass against a stand-in for the Claude API. The check itself has not run: the key in `.env` is rejected with 401 |
+| 6. AI generation | Done for the seed set | All 12 seed records, and 21 of 23 in total, have verified evidence quotes, ranges or a "not available" mark, and a cited summary. PSI-39 and PSI-47 are pending: the API account ran out of credit |
 | 7. Ranking and coverage | Not started | |
 | 8. Assistant and Overview | Not started | |
 | 9. Deploy | Not started | |
