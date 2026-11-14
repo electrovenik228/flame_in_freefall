@@ -9,5 +9,5 @@ def test_stats_and_health(client):
 
 @pytest.mark.django_db
 def test_error_format(client):
-    body = client.get("/api/v1/meta/stats/", HTTP_ACCEPT="text/csv").json()
+    body = client.get("/api/v1/health/", HTTP_ACCEPT="text/csv").json()
     assert set(body["error"]) == {"code", "message", "details"}

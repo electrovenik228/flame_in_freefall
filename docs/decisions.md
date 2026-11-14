@@ -61,3 +61,10 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 - **Validation.** A non-positive pressure, an oxygen value outside 0-100% or a negative flow is left empty and listed in the ingestion run. One case exists: FLEX row 115 gives 0 mmHg.
 - **Projects** are assigned by acronym prefix (ACME, FLEX, BASS, SAFFIRE, SAME). **Facilities** are matched on phrases in the PSI hardware text. Records that match nothing have no project or facility.
 - **`data_depth`** is set to per-test by code only where test runs were parsed. For other records it is left to the extraction job in step 6.
+
+## Step 4. Catalogue API
+
+- **Range filters on investigations mean overlap.** `oxygen_pct_min=30` keeps records whose tested range reaches 30% or more. On test runs the same filter is a plain comparison.
+- **Export file type** is chosen with `output=csv` or `output=json`, because `format` is reserved by the REST framework.
+- **No response cache in the weekend build.** Section 9 caches list and detail responses in Redis; without Redis the queries go straight to PostgreSQL, which is fast at this size.
+- **Default order** of investigations is by PSI number.
