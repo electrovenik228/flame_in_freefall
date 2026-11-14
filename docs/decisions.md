@@ -48,3 +48,16 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 - **AICall is added** to log token usage per request. The public daily token limit is computed from it.
 - **Environment gains numeric flow bounds** (`flow_cm_s_min`, `flow_cm_s_max`) beside the ventilation notes, because the flow criterion is scored in code.
 - **Contacts keep name, affiliation and role only.** E-mail addresses and phone numbers in the PSI record are not stored.
+
+## Step 3. Seed data
+
+- **All 23 Combustion Science records in the export are loaded**, not only the twelve seed records. The twelve carry `is_seed`. Section 2 puts every combustion record in scope and the export made this free.
+- **Fixture.** `backend/fixtures/psi_seed.json` is built from the raw export by `manage.py build_psi_fixture`. It drops the version-diff fields and contact details and records the export checksum.
+- **Test runs come from seven tables:** FLEX, ACME CFI-G (normal and inverse flames), BASS-II, Saffire-I, -II and -III. Other tables are stored as source documents only.
+- **FLEX column names.** The PSI headers read "O", "N", "CO" and "He initial ambient composition; mole fraction". They are read as O2, N2, CO2 and He.
+- **CFI-G inverse flames have no `oxygen_pct`.** Their XO2 column is the oxygen fraction of the burner gas, not of an atmosphere. The value is kept in `outcomes`.
+- **BASS-II has no flow speed.** The table gives fan and air display settings, not cm/s. They are kept in `outcomes` unconverted.
+- **Ranges and approximate cells.** For a cell such as "21.5 - 21.7" or "~ 22.1" the normalized value is the first number; the text as written is kept in `outcomes` and `raw_row`.
+- **Validation.** A non-positive pressure, an oxygen value outside 0-100% or a negative flow is left empty and listed in the ingestion run. One case exists: FLEX row 115 gives 0 mmHg.
+- **Projects** are assigned by acronym prefix (ACME, FLEX, BASS, SAFFIRE, SAME). **Facilities** are matched on phrases in the PSI hardware text. Records that match nothing have no project or facility.
+- **`data_depth`** is set to per-test by code only where test runs were parsed. For other records it is left to the extraction job in step 6.
