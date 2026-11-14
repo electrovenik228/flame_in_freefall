@@ -39,3 +39,12 @@ Test-run tables chosen for step 3 (they hold per-test oxygen plus pressure or fl
 - **Fonts.** Inter and IBM Plex Mono are bundled with the front end, so the browser makes no third-party font request.
 - **Raw PSI export stays out of git.** It is 6.9 MB, almost all of it version-diff fields (`added`, `removed`). A slim fixture built from it is committed instead, with the export's checksum.
 - **Working branch.** The build is committed on `weekend-build`, not on `main`.
+
+## Step 2. Data model
+
+- **SourceDocument is added** to the entities of section 5.1. It stores the text of each PSI record and experiment table, so evidence quotes and citations can be checked word for word against a stored source.
+- **AI-derived columns on Investigation are a projection.** `fuel_state`, `safety_pillars`, text-derived condition ranges and `judgment_scores` are copied from the newest accepted Insight row. The Insight rows themselves are never edited, which keeps the rule of section 5.3.
+- **Vocabularies** (fuel, fuel form, diluent, extinction mode) are one lookup table, `VocabularyTerm`, editable in the admin. Test runs store the term text.
+- **AICall is added** to log token usage per request. The public daily token limit is computed from it.
+- **Environment gains numeric flow bounds** (`flow_cm_s_min`, `flow_cm_s_max`) beside the ventilation notes, because the flow criterion is scored in code.
+- **Contacts keep name, affiliation and role only.** E-mail addresses and phone numbers in the PSI record are not stored.
