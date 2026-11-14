@@ -160,7 +160,8 @@ def run_extraction(sources: list[Source], attempts: int = 2) -> tuple[Extraction
     messages: list[dict] = [
         {
             "role": "user",
-            "content": f"Sources for one investigation:\n\n{render_sources(sources)}\n\nFill the fields for this investigation.",
+            "content": f"Sources for one investigation:\n\n{render_sources(sources)}\n\n"
+            "Fill the fields for this investigation.",
         }
     ]
     checks: dict = {"attempts": 0, "problems": []}
