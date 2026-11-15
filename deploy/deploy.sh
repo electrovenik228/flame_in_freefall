@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy over SSH (section 12). Usage: deploy/deploy.sh user@server [remote path]
+# Deploy over SSH (section 12). Usage: [HTTP_PORT=2026] deploy/deploy.sh user@server [remote path]
+# HTTP_PORT is the public port of the site (default 80); use another one on a shared server.
 # Needs: SSH access, Docker with Compose on the server, and a local .env for production.
 # It copies the repository and .env, builds, starts, loads data and checks health.
 # It never deletes the database volume or the backups.
@@ -8,13 +9,15 @@ set -euo pipefail
 TARGET="${1:?usage: deploy/deploy.sh user@server [remote path]}"
 REMOTE_DIR="${2:-flame_in_freefall}"
 HOST="${TARGET#*@}"
+HTTP_PORT="${HTTP_PORT:-80}"
+SITE="http://${HOST}$([ "${HTTP_PORT}" = 80 ] || echo ":${HTTP_PORT}")"
 cd "$(dirname "$0")/.."
 
 [ -f .env ] || { echo "No .env here. Copy .env.example and fill it in." >&2; exit 1; }
 grep -q "^DJANGO_ALLOWED_HOSTS=.*${HOST}" .env || { echo "DJANGO_ALLOWED_HOSTS in .env does not include ${HOST}." >&2; exit 1; }
 grep -q '^DJANGO_DEBUG=False' .env || { echo "Set DJANGO_DEBUG=False in .env before deploying." >&2; exit 1; }
 
-COMPOSE="docker compose -f docker-compose.prod.yml"
+COMPOSE="HTTP_PORT=${HTTP_PORT} docker compose -f docker-compose.prod.yml"
 
 echo "Copying the repository to ${TARGET}:${REMOTE_DIR}"
 ssh "${TARGET}" "mkdir -p ${REMOTE_DIR}/backups"
@@ -29,13 +32,13 @@ ssh "${TARGET}" "cd ${REMOTE_DIR} && ${COMPOSE} exec -T web sh -c 'python manage
 
 echo "Checking health"
 for _ in $(seq 1 20); do
-  if curl -fsS "http://${HOST}/api/v1/health/" >/dev/null; then
-    echo "Site:   http://${HOST}/"
-    echo "Health: http://${HOST}/api/v1/health/"
+  if curl -fsS "${SITE}/api/v1/health/" >/dev/null; then
+    echo "Site:   ${SITE}/"
+    echo "Health: ${SITE}/api/v1/health/"
     echo "Admin:  ssh -L 8001:localhost:8001 ${TARGET}, then http://localhost:8001/admin/"
     exit 0
   fi
   sleep 3
 done
-echo "The health endpoint did not answer on http://${HOST}/." >&2
+echo "The health endpoint did not answer on ${SITE}/." >&2
 exit 1
