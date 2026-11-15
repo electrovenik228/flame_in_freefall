@@ -129,3 +129,4 @@ Status: built; the live part of the check waits for API credit.
 - **Security headers** are set by Nginx in every location through `deploy/nginx/security-headers.conf`. The API docs page gets a policy that allows Swagger UI from cdn.jsdelivr.net.
 - **The health endpoint returns 503** when the database is unreachable, and the `web` container uses it as its health check.
 - **The daily token limit** is `AI_DAILY_TOKEN_LIMIT` in `.env` (5,000,000).
+- **Shared server.** The server also runs other projects, and port 80 belongs to one of them, so the site is published on port 2026 (`HTTP_PORT=2026 deploy/deploy.sh root@147.45.185.185`). The firewall was left as found (inactive): enabling the rule of section 12 (ports 22 and 80 only) would cut off the other projects. The admin port 8001 is bound to 127.0.0.1 and is closed from outside.

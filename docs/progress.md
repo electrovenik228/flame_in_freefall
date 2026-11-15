@@ -13,7 +13,7 @@ Weekend build, section 13.3 of the specification. A step is done only when its c
 | 6. AI generation | Done for the seed set | All 12 seed records, and 21 of 23 in total, have verified evidence quotes, ranges or a "not available" mark, and a cited summary. PSI-39 and PSI-47 are pending: the API account ran out of credit |
 | 7. Ranking and coverage | Done, AI judgment pending credit | Sub-scores add up to the total (test); a record without test runs is ranked from its ranges (test); the lunar habitat scenario passes end to end in the browser. The relevance judgment job is built and tested but has not run for lack of API credit, so fuel and safety show as "not available" and totals are rescaled |
 | 8. Assistant and Overview | Partly passed, live run pending credit | Status line appears within 1 second (browser test). Streaming, citation chips, number check, refusal handling, limits: 9 tests against a stand-in for the Claude API. Five demo questions and the off-topic decline are written as a browser test (`E2E_ASSISTANT=live`) and wait for API credit |
-| 9. Deploy | Ready, not deployed | Production build tested locally: site, health and API answer through Nginx, admin only on 127.0.0.1, no debug pages, security headers on every response, nightly backup written, all 14 browser checks pass. Deploying waits for the SSH user and key and the owner's go-ahead |
+| 9. Deploy | Done, 15 Nov 2026 | Live at http://147.45.185.185:2026/. Every page and the health endpoint answer from outside; the admin is not reachable publicly and opens through the SSH tunnel; first backup written; the daily token limit is set |
 | 10. Handover | Done | A fresh clone on a separate project and ports ran with the README commands: site and admin answer, 66 back-end tests and 14 browser checks pass |
 
 ## Open items
@@ -21,5 +21,4 @@ Weekend build, section 13.3 of the specification. A step is done only when its c
 See [limitations.md](limitations.md). In short:
 
 1. Add Claude API credit, then run `generate_ai` (judgments for all records, plus PSI-39 and PSI-47), `export_ai_output`, and the live assistant test. This completes the checks of steps 7 and 8.
-2. Provide the SSH user and key, then run `deploy/deploy.sh user@server`.
 
