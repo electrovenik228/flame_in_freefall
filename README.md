@@ -2,7 +2,7 @@
 
 **Ranked, comparable and cited fire-safety insight from NASA's microgravity combustion experiments.**
 
-**Live demo: http://147.45.185.185:2026/** (desktop browser recommended)
+**Live demo: http://186.246.113.49/** (desktop browser recommended)
 
 ![Overview page](docs/images/overview.png)
 
@@ -12,10 +12,10 @@ One rule shapes the design: **structured first, AI second.** Every number on a c
 
 ## For judges: a two-minute tour
 
-1. **Open the [lunar habitat ranking](http://147.45.185.185:2026/ranking?env=lunar-habitat).** Investigations are ranked for a habitat with 30% oxygen or more at 70.3 kPa (10.2 psi) or less. Each row shows a stacked bar of its five sub-scores. Press **Breakdown** to see the weight, score, one-sentence reason and PSI source for each criterion. Move a weight slider: the order changes instantly in the browser.
-2. **Open the top record**, for example [ACME CFI-G](http://147.45.185.185:2026/investigations/PSI-159). Read the AI summary at two levels (**Plain** and **Expert**), click a numbered chip to see the exact source passage, and open **Quoted evidence** to see the word-for-word quote behind each attribute the AI read.
-3. **Open [Coverage and gaps](http://147.45.185.185:2026/coverage).** A heatmap shows which oxygen and pressure combinations have been tested, with the lunar window and the Earth, station and Mars atmospheres drawn on it. Gap cards list what is untested, such as the 100% oxygen spacesuit atmosphere, and the nearest investigations.
-4. **Ask the [research assistant](http://147.45.185.185:2026/assistant)** a question such as *"How do BASS-II and Saffire differ in sample size and flow?"*. The answer streams in with numbered sources and a mark that says whether its numbers were found in the cited records.
+1. **Open the [lunar habitat ranking](http://186.246.113.49/ranking?env=lunar-habitat).** Investigations are ranked for a habitat with 30% oxygen or more at 70.3 kPa (10.2 psi) or less. Each row shows a stacked bar of its five sub-scores. Press **Breakdown** to see the weight, score, one-sentence reason and PSI source for each criterion. Move a weight slider: the order changes instantly in the browser.
+2. **Open the top record**, for example [ACME CFI-G](http://186.246.113.49/investigations/PSI-159). Read the AI summary at two levels (**Plain** and **Expert**), click a numbered chip to see the exact source passage, and open **Quoted evidence** to see the word-for-word quote behind each attribute the AI read.
+3. **Open [Coverage and gaps](http://186.246.113.49/coverage).** A heatmap shows which oxygen and pressure combinations have been tested, with the lunar window and the Earth, station and Mars atmospheres drawn on it. Gap cards list what is untested, such as the 100% oxygen spacesuit atmosphere, and the nearest investigations.
+4. **Ask the [research assistant](http://186.246.113.49/assistant)** a question such as *"How do BASS-II and Saffire differ in sample size and flow?"*. The answer streams in with numbered sources and a mark that says whether its numbers were found in the cited records.
 
 A longer walkthrough is in [docs/demo-script.md](docs/demo-script.md).
 
@@ -41,7 +41,7 @@ A longer walkthrough is in [docs/demo-script.md](docs/demo-script.md).
 
 **Data.** 23 Combustion Science investigations from PSI, including the twelve named in the challenge brief: BASS, BASS-II, Saffire-I, -II and -III, ACME BRE, SAME, SAME-R, FLEX, FLEX-2, ACME CFI-G and ACME E-FIELD Flames. The catalogue also holds 308 linked publications and 749 test runs parsed from the experiment tables of FLEX, ACME CFI-G, BASS-II and the three Saffire flights. Units are fixed (oxygen in percent by volume, pressure in kPa with psi beside it, flow in cm/s), and a missing value stays missing: it is never replaced with zero or an estimate.
 
-**Ranking rubric.** A weighted rubric, explained on the [About page](http://147.45.185.185:2026/about):
+**Ranking rubric.** A weighted rubric, explained on the [About page](http://186.246.113.49/about):
 
 | Criterion | Weight | Scored by |
 | --- | --- | --- |
