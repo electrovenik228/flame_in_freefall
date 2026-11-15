@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.text import slugify
 
+from ai.services.sources import refresh_stats_document
 from catalog.models import (
     Facility,
     Investigation,
@@ -265,6 +266,7 @@ def load_fixture(path: Path) -> IngestionRun:
             counts["test_runs"] += len(parsed)
 
         recompute_ranges_from_test_runs(investigation)
+        refresh_stats_document(investigation)  # citable counts and ranges, computed from the database
         investigation.refresh_search_text()
 
     Publication.objects.update(search_text=SearchVector("title", "authors", config="english"))

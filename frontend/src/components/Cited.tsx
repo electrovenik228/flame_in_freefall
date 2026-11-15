@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import type { Citation, Segment } from "@/lib/api";
 import { dateTime } from "@/lib/format";
@@ -39,10 +40,27 @@ export function CitationChip({ citation }: { citation: Citation }) {
             {citation.psi_id} · {citation.document_title}
           </span>
           <span className="my-2 block max-h-48 overflow-auto border-l-2 border-accent/60 pl-2 text-text">“{citation.cited_text}”</span>
-          <ExternalA href={citation.psi_url}>View on PSI</ExternalA>
+          {citation.psi_url.startsWith("http") ? (
+            <ExternalA href={citation.psi_url}>{citation.psi_url.includes("psi.nasa.gov") ? "View on PSI" : "Open the source"}</ExternalA>
+          ) : (
+            <Link to={citation.psi_url} className="text-accent hover:underline">Open this page of the site</Link>
+          )}
         </span>
       )}
     </span>
+  );
+}
+
+const SITE_PATH = /(\/(?:investigations|ranking|coverage)(?:[/?][^\s)"]*)?)/g;
+
+/** Turns paths of this site, which the assistant may name, into links that open the view. */
+function linkify(text: string): ReactNode[] {
+  return text.split(SITE_PATH).map((part, index) =>
+    index % 2 === 1 ? (
+      <Link key={index} to={part.replace(/[.,;]$/, "")} className="text-accent underline-offset-2 hover:underline">{part}</Link>
+    ) : (
+      <Fragment key={index}>{part}</Fragment>
+    ),
   );
 }
 
@@ -52,7 +70,7 @@ export function CitedText({ segments, citations }: { segments: Segment[]; citati
     <span className="whitespace-pre-wrap">
       {segments.map((segment, index) => (
         <span key={index}>
-          {segment.text}
+          {linkify(segment.text)}
           {segment.citations.map((n) => {
             const citation = byNumber.get(n);
             return citation ? <CitationChip key={n} citation={citation} /> : null;

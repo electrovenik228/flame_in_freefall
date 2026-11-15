@@ -106,3 +106,17 @@ Status on 15 November 2026: **check passed for the twelve seed records**; 21 of 
 - **Rankings are computed on request** from stored data (about 0.1 s), and also stored per pair in `RelevanceScore` by `load_seed`, `import_ai_output` and `generate_ai`.
 - **Coverage.** Oxygen in 2-point bins against pressure in 20 kPa bins or flow in 5 cm/s bins. An empty cell means no test run. Counts use five ordered steps of one hue. The spacesuit atmosphere is off the chart and reported as a gap card.
 - **Chart colours** for the five criteria were checked with a colour-vision validator on both theme surfaces.
+
+## Step 8. Assistant and Overview
+
+Status: built; the live part of the check waits for API credit.
+
+- **Tools return `search_result` blocks** with citations on, so answers cite the tool results directly. Each block's `source` is the PSI link, or a page of the site for the ranking method.
+- **Model and settings.** `CLAUDE_MODEL_FAST` (Sonnet 5.5), `thinking: between_tools`, effort low, output capped by `ASSISTANT_MAX_OUTPUT_TOKENS` (2000), at most 6 tool rounds.
+- **Text written before a tool call is discarded** from the answer; only the final turn's text is shown and stored.
+- **Number check after the stream.** A number passes when it appears in a tool result of that turn or in the visitor's own messages. An answer with no tool call (an off-topic redirect) gets no mark.
+- **Limits.** Daily token limit over all public AI calls, a per-session message cap and a per-IP daily cap. The IP cap counts in the cache under a salted hash; no address is stored.
+- **CSRF.** The two POST endpoints accept only `application/json`, which a cross-site form cannot send.
+- **Endpoints are plain async Django views**, not REST framework views, so the reply can stream.
+- **Overview incidents** quote the three NASA pages of section 4.1 word for word, each with its link. The flame hero is a drawn illustration, labelled so, because no licensed NASA image pair was in hand.
+- **The video** loads from youtube-nocookie.com only when the visitor presses play.
