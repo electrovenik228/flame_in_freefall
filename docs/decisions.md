@@ -120,3 +120,12 @@ Status: built; the live part of the check waits for API credit.
 - **Endpoints are plain async Django views**, not REST framework views, so the reply can stream.
 - **Overview incidents** quote the three NASA pages of section 4.1 word for word, each with its link. The flame hero is a drawn illustration, labelled so, because no licensed NASA image pair was in hand.
 - **The video** loads from youtube-nocookie.com only when the visitor presses play.
+
+## Step 9. Deploy
+
+- **`deploy/deploy.sh user@server`** copies the tracked files and `.env` over SSH, builds, starts, loads the seed and the stored AI output, and waits for the health endpoint. It never removes volumes or backups.
+- **Data on the server comes from fixtures**, so the server needs no Claude request to show summaries.
+- **Backups.** A `backup` service writes one `pg_dump` a day to `./backups` and keeps the newest 14. A dump and restore were not yet tested on the server; the restore command is in `deploy/server-setup.md`.
+- **Security headers** are set by Nginx in every location through `deploy/nginx/security-headers.conf`. The API docs page gets a policy that allows Swagger UI from cdn.jsdelivr.net.
+- **The health endpoint returns 503** when the database is unreachable, and the `web` container uses it as its health check.
+- **The daily token limit** is `AI_DAILY_TOKEN_LIMIT` in `.env` (5,000,000).

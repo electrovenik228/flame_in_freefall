@@ -205,9 +205,12 @@ def global_search(request):
 )
 @api_view(["GET"])
 def health(request):
-    """Health endpoint for the API and its database."""
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT 1")
+    """Health endpoint for the API and its database. Returns 503 when the database is unreachable."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception:  # any database failure means unhealthy
+        return Response({"status": "error", "database": "unreachable"}, status=503)
     return Response({"status": "ok", "database": "ok"})
 
 

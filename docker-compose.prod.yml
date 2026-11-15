@@ -1,0 +1,59 @@
+# Production: one server, Nginx as the only public entry point (section 12).
+#   docker compose -f docker-compose.prod.yml up -d --build
+# The admin is bound to 127.0.0.1 and reached through an SSH tunnel:
+#   ssh -L 8001:localhost:8001 user@server, then http://localhost:8001/admin/
+services:
+  db:
+    image: postgres:17-alpine
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  web:
+    build: ./backend
+    env_file: .env
+    environment:
+      DJANGO_DEBUG: "False"
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${ADMIN_PORT:-8001}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/', timeout=4)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    build:
+      context: .
+      dockerfile: deploy/nginx/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    depends_on:
+      - web
+
+  # Nightly dump to ./backups; deploy/backup.sh keeps the newest 14. Restore: see README.
+  backup:
+    image: postgres:17-alpine
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - ./backups:/backups
+      - ./deploy/backup.sh:/backup.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+volumes:
+  pgdata:
